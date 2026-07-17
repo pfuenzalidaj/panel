@@ -1,0 +1,19 @@
+{
+  "producto": "Dashboard Ejecutivo de Gestión TI",
+  "organizacion": "Coordinador Eléctrico Nacional",
+  "version": "2.3.0",
+  "estado": "estable",
+  "fecha_entrega": "2026-07-08",
+  "lanzador": "Iniciar_Actualizador_Dashboard.bat",
+  "dashboard": "dashboard/Dashboard_Ejecutivo_Gestion_TI.html",
+  "fuentes": {
+    "tickets": "fuentes/Tickets_Incidentes.xlsx",
+    "problemas": "fuentes/Informe_Problemas.xlsx",
+    "cambios": "fuentes/Reporte_RFC-CAB_2026_237_278_202607101029.xlsx"
+  },
+  "componentes": {
+    "servidor": "aplicacion/servidor_actualizador.py",
+    "generador": "aplicacion/generador_dashboard.py",
+    "interfaz": "aplicacion/interfaz_actualizador.html"
+  }
+}

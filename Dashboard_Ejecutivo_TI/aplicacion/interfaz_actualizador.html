@@ -1,0 +1,365 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Actualizador de Dashboard CEN</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --navy: #0b1f3a;
+      --blue: #1463ff;
+      --blue-dark: #0d49bd;
+      --ink: #172033;
+      --muted: #667085;
+      --soft: #f4f7fb;
+      --ok: #087a55;
+      --danger: #b42318;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: Inter, "Segoe UI", Arial, sans-serif;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at 15% 15%, #dbe9ff 0, transparent 30%),
+        linear-gradient(145deg, #f8fafc, #e9eff8);
+      display: grid;
+      place-items: center;
+      padding: 28px;
+    }
+    main {
+      width: min(980px, 100%);
+      background: rgba(255,255,255,.94);
+      border: 1px solid rgba(255,255,255,.8);
+      border-radius: 22px;
+      box-shadow: 0 24px 70px rgba(11,31,58,.16);
+      overflow: hidden;
+    }
+    header {
+      padding: 28px 34px 24px;
+      color: white;
+      background: linear-gradient(120deg, var(--navy), #153f75);
+    }
+    .eyebrow {
+      margin: 0 0 8px;
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: .13em;
+      text-transform: uppercase;
+      color: #aecdff;
+    }
+    h1 {
+      margin: 0;
+      font-size: clamp(24px, 5vw, 36px);
+      letter-spacing: -.025em;
+    }
+    header p { margin: 10px 0 0; color: #dbe8fb; line-height: 1.55; }
+    .content { padding: 30px 34px 34px; }
+    .dropzone {
+      display: block;
+      padding: 36px 24px;
+      border: 2px dashed #aab9cc;
+      border-radius: 16px;
+      background: var(--soft);
+      text-align: center;
+      cursor: pointer;
+      transition: .18s ease;
+    }
+    .dropzone:hover, .dropzone.dragging {
+      border-color: var(--blue);
+      background: #edf4ff;
+      transform: translateY(-1px);
+    }
+    .icon {
+      width: 52px;
+      height: 52px;
+      margin: 0 auto 14px;
+      display: grid;
+      place-items: center;
+      border-radius: 14px;
+      background: #dce9ff;
+      color: var(--blue);
+      font-size: 27px;
+      font-weight: 800;
+    }
+    .dropzone strong { display: block; margin-bottom: 7px; font-size: 17px; }
+    .dropzone span { color: var(--muted); font-size: 14px; }
+    .source-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 16px;
+      align-items: start;
+    }
+    .source-grid > div { min-width: 0; }
+    .source-label {
+      margin: 0 0 8px;
+      color: var(--navy);
+      font-size: 13px;
+      font-weight: 700;
+    }
+    .source-label small {
+      color: var(--muted);
+      font-weight: 500;
+    }
+    .source-grid .dropzone {
+      height: auto;
+      min-height: 210px;
+      padding: 24px 16px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+    .source-grid .icon { width: 44px; height: 44px; font-size: 22px; }
+    .source-grid .dropzone.secondary { background: #f7f5ff; border-color: #b8add8; }
+    .source-grid .dropzone.secondary .icon { color: #6246a8; background: #e9e3fa; }
+    .source-grid .dropzone.tertiary { background: #f2fbf6; border-color: #b6ddc5; }
+    .source-grid .dropzone.tertiary .icon { color: #18804f; background: #e0f5e8; }
+    input[type=file] { display: none; }
+    .selected {
+      min-height: 20px;
+      margin: 10px 0 16px;
+      color: var(--muted);
+      text-align: center;
+      font-size: 14px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .selected.ready { color: var(--ink); font-weight: 600; }
+    button, .button {
+      appearance: none;
+      border: 0;
+      border-radius: 11px;
+      min-height: 44px;
+      padding: 0 18px;
+      font: inherit;
+      font-weight: 700;
+      cursor: pointer;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      transition: .18s ease;
+    }
+    #update {
+      width: 100%;
+      margin-top: 2px;
+      position: static;
+      color: white;
+      background: var(--blue);
+      box-shadow: 0 9px 24px rgba(20,99,255,.24);
+    }
+    #update:hover:not(:disabled) {
+      background: var(--blue-dark);
+      transform: translateY(-1px);
+    }
+    button:disabled { opacity: .45; cursor: not-allowed; }
+    .status {
+      display: none;
+      margin-top: 18px;
+      padding: 15px 17px;
+      border-radius: 12px;
+      line-height: 1.45;
+      font-size: 14px;
+    }
+    .status.show { display: block; }
+    .status.busy { color: #174ea6; background: #edf4ff; }
+    .status.success { color: var(--ok); background: #eafaf3; }
+    .status.error { color: var(--danger); background: #fff0ee; }
+    .actions { display: none; gap: 10px; margin-top: 14px; flex-wrap: wrap; }
+    .actions.show { display: flex; }
+    .actions .button { flex: 1; color: white; background: var(--navy); }
+        .actions .secondary { color: var(--ink); background: #edf1f6; }
+    .open-last { display:flex; align-items:center; justify-content:space-between; gap:14px; margin-top:14px; padding:14px 16px; border-radius:14px; border:1px solid rgba(20,99,255,.16); background:#f3f7ff; }
+    .open-last b { display:block; color: var(--navy); font-size:14px; font-weight:700; }
+    .open-last span { display:block; margin-top:2px; color: var(--muted); font-size:12.5px; }
+    .open-last .button { flex:0 0 auto; white-space:nowrap; }
+    footer {
+      display: flex;
+      justify-content: space-between;
+      gap: 16px;
+      align-items: center;
+      padding-top: 22px;
+      color: var(--muted);
+      font-size: 12px;
+    }
+    #shutdown {
+      min-height: auto;
+      padding: 5px 0;
+      color: var(--muted);
+      background: transparent;
+      font-weight: 600;
+    }
+    @media (max-width: 560px) {
+      body { padding: 12px; }
+      header, .content { padding-left: 22px; padding-right: 22px; }
+      .actions { flex-direction: column; }
+      .source-grid { grid-template-columns: 1fr; }
+      footer { align-items: flex-start; flex-direction: column; }
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <header>
+      <p class="eyebrow">CEN · Gestión TI</p>
+      <h1>Actualizar dashboard</h1>
+      <p>Carga las fuentes oficiales de tickets, problemas y cambios. Los nombres pueden cambiar; validaremos su estructura antes de generar el dashboard.</p>
+    </header>
+    <section class="content">
+      <div class="source-grid">
+        <div>
+          <p class="source-label">1. Tickets e incidentes <small>· obligatorio</small></p>
+          <label class="dropzone" id="dropzone" for="file">
+            <div class="icon">↑</div>
+            <strong>Excel de tickets</strong>
+            <span>Arrastra o haz clic para seleccionar</span>
+          </label>
+          <input id="file" type="file" accept=".xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet">
+          <div class="selected" id="selected">Ningún archivo seleccionado</div>
+        </div>
+        <div>
+          <p class="source-label">2. Seguimiento de problemas <small>· opcional</small></p>
+          <label class="dropzone secondary" id="problems-dropzone" for="problems">
+            <div class="icon">↗</div>
+            <strong>Excel de problemas</strong>
+            <span>Hoja Informe_modulo_Problemas_* automática</span>
+          </label>
+          <input id="problems" type="file" accept=".xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet">
+          <div class="selected" id="problems-selected">Si se omite, se usa el archivo local</div>
+        </div>
+        <div>
+          <p class="source-label">3. Gestión del cambio <small>· opcional</small></p>
+          <label class="dropzone tertiary" id="changes-dropzone" for="changes">
+            <div class="icon">⟲</div>
+            <strong>Excel de cambios</strong>
+            <span>Hoja Reporte_RFC-CAB_* automática</span>
+          </label>
+          <input id="changes" type="file" accept=".xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet">
+          <div class="selected" id="changes-selected">Si se omite, se usa el archivo local</div>
+        </div>
+      </div>
+      <button id="update" disabled>Actualizar dashboard</button>
+      <div class="open-last">
+        <div>
+          <b>Abrir último dashboard</b>
+          <span>Se abre la versión persistida actual, sin cargar nuevos archivos.</span>
+        </div>
+        <a class="button secondary" href="/dashboard" target="_blank" rel="noopener">Abrir último dashboard</a>
+      </div>
+      <div class="status" id="status" role="status" aria-live="polite"></div>
+      <div class="actions" id="actions">
+        <a class="button" href="/dashboard" target="_blank" rel="noopener">Abrir dashboard</a>
+        <a class="button secondary" href="/download">Descargar HTML</a>
+      </div>
+      <footer>
+        <span>La hoja se detecta automáticamente por sus columnas · v2.3.0</span>
+        <button id="shutdown">Cerrar actualizador</button>
+      </footer>
+    </section>
+  </main>
+  <script>
+    const input = document.querySelector("#file");
+    const dropzone = document.querySelector("#dropzone");
+    const selected = document.querySelector("#selected");
+    const problemsInput = document.querySelector("#problems");
+    const problemsDropzone = document.querySelector("#problems-dropzone");
+    const problemsSelected = document.querySelector("#problems-selected");
+    const changesInput = document.querySelector("#changes");
+    const changesDropzone = document.querySelector("#changes-dropzone");
+    const changesSelected = document.querySelector("#changes-selected");
+    const update = document.querySelector("#update");
+    const status = document.querySelector("#status");
+    const actions = document.querySelector("#actions");
+    let ticketFile = null;
+    let problemsFile = null;
+    let changesFile = null;
+
+    function setFile(file, targetInput, targetSelected, required, saveFile) {
+      if (!file) return;
+      if (!file.name.toLowerCase().endsWith(".xlsx")) {
+        showStatus("Selecciona un archivo con extensión .xlsx.", "error");
+        targetInput.value = "";
+        saveFile(null);
+        if (required) update.disabled = true;
+        return;
+      }
+      saveFile(file);
+      targetSelected.textContent = `${file.name} · ${(file.size / 1024 / 1024).toFixed(1)} MB`;
+      targetSelected.title = file.name;
+      targetSelected.className = "selected ready";
+      if (required) update.disabled = false;
+      status.className = "status";
+      actions.className = "actions";
+    }
+
+    function showStatus(message, kind) {
+      status.textContent = message;
+      status.className = `status show ${kind}`;
+    }
+
+    function bindDropzone(zone, targetInput, targetSelected, required, saveFile) {
+      targetInput.addEventListener("change", () => {
+        setFile(targetInput.files[0], targetInput, targetSelected, required, saveFile);
+      });
+      ["dragenter", "dragover"].forEach(name => zone.addEventListener(name, event => {
+        event.preventDefault();
+        event.stopPropagation();
+        zone.classList.add("dragging");
+      }));
+      ["dragleave", "drop"].forEach(name => zone.addEventListener(name, event => {
+        event.preventDefault();
+        event.stopPropagation();
+        zone.classList.remove("dragging");
+      }));
+      zone.addEventListener("drop", event => {
+        setFile(event.dataTransfer.files[0], targetInput, targetSelected, required, saveFile);
+      });
+    }
+    bindDropzone(dropzone, input, selected, true, file => ticketFile = file);
+    bindDropzone(problemsDropzone, problemsInput, problemsSelected, false, file => problemsFile = file);
+    bindDropzone(changesDropzone, changesInput, changesSelected, false, file => changesFile = file);
+    document.addEventListener("dragover", event => event.preventDefault());
+    document.addEventListener("drop", event => event.preventDefault());
+
+    update.addEventListener("click", async () => {
+      const file = ticketFile;
+      if (!file) return;
+      update.disabled = true;
+      actions.className = "actions";
+      showStatus("Procesando el Excel y regenerando el dashboard…", "busy");
+      const form = new FormData();
+      form.append("file", file);
+      if (problemsFile) form.append("problems", problemsFile);
+      if (changesFile) form.append("changes", changesFile);
+      try {
+        const response = await fetch("/api/update", { method: "POST", body: form });
+        const result = await response.json();
+        if (!response.ok || !result.ok) {
+          throw new Error(result.error || "No fue posible actualizar.");
+        }
+        showStatus(
+          `Listo. ${result.tickets ?? 0} tickets, ${result.incidents ?? 0} incidentes, ${result.problems ?? 0} problemas y ${result.changes ?? 0} cambios. Compromisos: ${result.overdue ?? 0} vencidos y ${result.withoutCommitment ?? 0} sin fecha.`,
+          "success"
+        );
+        actions.className = "actions show";
+      } catch (error) {
+        showStatus(error.message, "error");
+      } finally {
+        update.disabled = false;
+      }
+    });
+
+    document.querySelector("#shutdown").addEventListener("click", async () => {
+      try {
+        await fetch("/api/shutdown", { method: "POST" });
+      } catch (_) {}
+      showStatus("Actualizador cerrado. Ya puedes cerrar esta pestaña.", "busy");
+      update.disabled = true;
+    });
+  </script>
+</body>
+</html>

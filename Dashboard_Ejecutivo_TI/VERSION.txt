@@ -1,0 +1,4 @@
+Dashboard Ejecutivo de Gestión TI
+Versión: 2.3.0
+Fecha de entrega: 2026-07-10
+Estado: Estable
